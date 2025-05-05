@@ -1,5 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, ValidationPipe, Patch, Post, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './DTO/create-user.dto';
+import { UpdateUserDto } from './DTO/update-user.dto';
+import { ValidRoles } from 'src/common/enums/valid.roles.enum';
 
 @Controller('users')
 export class UsersController {
@@ -9,33 +12,31 @@ export class UsersController {
 
     // GET /users or /users?role=value
     @Get()
-    findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
-        return this.usersService.findAll(role);     
+    findAll(@Query('role') role?: ValidRoles) {
+        return this.usersService.findAll(role);    
     }
 
     // GET /users/:id
     @Get(':id')
     findOne(@Param('id') id: string) {
-        // convert the id to a number using the + operator
-        return this.usersService.findOne(+id);
+        return this.usersService.findOne(id);
     }
 
     // POST /users
     @Post()
-    create(@Body() user: { name: string, email: string, privateKey: string, role: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
-        return this.usersService.create(user);
+    create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+        return this.usersService.create(createUserDto);
     }
 
     // PATCH /users/:id
     @Patch(':id')
-    update(@Param('id') id: string, @Body() userUpdate: { name?: string, email?: string, privateKey?: string, role?: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
-        return this.usersService.update(+id, userUpdate);
+    update(@Param('id') id: string, @Body(ValidationPipe) updateUserDto: UpdateUserDto) {
+        return this.usersService.update(id, updateUserDto);
     }
 
     // DELETE /users/:id
     @Delete(':id')
     remove(@Param('id') id: string) {
-        return this.usersService.remove(+id);     
+        return this.usersService.remove(id);     
     }
-
 }
